@@ -1,0 +1,295 @@
+https://plantuml.com/ru/class-diagram
+
+
+@startuml
+
+' Перечисления
+enum BuildingType {
+    MainBase
+    Red
+    Green
+    Blue
+    Grey
+}
+
+enum SurfaceType {
+    Any
+    Field
+    Water
+    Forest
+    Mountain
+}
+
+enum BuildingEmblem {
+    None
+    Food
+    Energy
+    Ruby
+    Sphere
+}
+
+' Интерфейсы
+interface IPlayer {
+    +IHand PlayerHand
+    +Player PlayerId
+    +Fraction PlayerFraction
+    +PlayerType PlayerType
+}
+
+interface IBot {
+    +void MakeMove()
+    +void AnalyzeSituation()
+}
+
+interface IFraction {
+    +Fraction Id
+    +string FractionNameTag
+    +string FractionDescriptionTag
+    +string FractionColor
+}
+
+interface IHand {
+    +void AddBuildingsToFullHand()
+    +bool GetAbilityToSellCard()
+    +void UseCard(int cardId)
+    +void ReplaceCard(int cardId)
+    +void SellCard(int cardId)
+}
+
+' Классы игрока
+class HumanControlledPlayer {
+    +IHand PlayerHand
+    +Player PlayerId
+    +Fraction PlayerFraction
+    +PlayerType PlayerType
+    +HumanControlledPlayer(IHand, Player, Fraction)
+}
+
+class DumbAIControlledPlayer {
+    +IHand PlayerHand
+    +Player PlayerId
+    +Fraction PlayerFraction
+    +PlayerType PlayerType
+    -EventHandler _eventHandler
+    -OptimalMoveProcessor OMP
+    -AIMovesSystem MovesSystem
+    +Game Game
+    +DumbAIControlledPlayer(...)
+    -void MakeMove()
+}
+
+class PlayersCreator {
+    -GameMovesSystem _gameMovesSystem
+    -BuilderOnTile _builderOnTile
+    -PlayerHandVisuals _playerHandVisuals
+    -EventHandler _eventHandler
+    -BuildingsObjectStorage _buildingsObjectStorage
+    +IPlayer CreateNewPlayer(Player, Fraction, PlayerType)
+}
+
+' Фракции
+class Eaters {
+    +Fraction Id
+    +string FractionNameTag
+    +string FractionDescriptionTag
+    +string FractionColor
+}
+class Proletariats {
+    +Fraction Id
+    +string FractionNameTag
+    +string FractionDescriptionTag
+    +string FractionColor
+}
+class Marauders {
+    +Fraction Id
+    +string FractionNameTag
+    +string FractionDescriptionTag
+    +string FractionColor
+}
+class Goldkeepers {
+    +Fraction Id
+    +string FractionNameTag
+    +string FractionDescriptionTag
+    +string FractionColor
+}
+
+' Рука игрока
+class PlayerHand {
+    -Building[] _hand
+    +PlayerHandVisuals PlayerHandVisuals
+    -BuilderOnTile _builderOnTile
+    -GameMovesSystem _gameMovesSystem
+    -BuildingsObjectStorage _buildingsObjectStorage
+    -EventHandler _eventHandler
+    -Building _lastWastedBuilding
+    -int _lastWastedBuildingId
+    -int _abilityToReplaceCardCount
+    -bool _abilityToSellCard
+    +PlayerHand(...)
+    -void SetPlayerHand(PlayerHand)
+    +void AddBuildingsToFullHand()
+    +bool GetAbilityToSellCard()
+    +void UseCard(int cardId)
+    +void ReplaceCard(int cardId)
+    +void SellCard(int cardId)
+}
+
+' Визуализация руки игрока
+class PlayerHandVisuals {
+    +CardUI[] Cards
+    +CardUI SelectedCard
+    +void ShowHand(PlayerHand hand)
+    +void SelectCard(CardUI card)
+    +void UpdateHand()
+    +void AnimateCardSelection(CardUI card)
+}
+
+' Система ходов
+class GameMovesSystem {
+    +Game Game
+    +int CurrentPlayerStepCount
+    +int PreviousPlayerStepCount
+    -Queue<Player> _playersTurnOrder
+    -EventHandler _eventHandler
+    -PlayersCreator _playersCreator
+    -Player _firstPlayer
+    -TilesClickManager _tilesClickManager
+    -PlayerHandVisuals _playerHandVisuals
+    +void Initialize()
+    -void AddPlayersInQueue()
+}
+
+class Game {
+    +Dictionary<Player, Vector2Int> playerMainBasePosition
+    +Dictionary<Player, int> playerMoney
+    +List<KeyValuePair<Player, Building>> playerBuildings
+    +List<KeyValuePair<Player, Building>> playerGreyBuildings
+    +List<KeyValuePair<Player, Tile>> playerTiles
+    +Dictionary<Player, IHand> playerHandOfCards
+    +Dictionary<Player, IPlayer> players
+    +bool IsProletariatsGetFine
+    +bool IsMaraudersGetBuff
+    +int SumOfThrownDice
+    +int[] ThrownDiceValues
+    +bool IsThrownTwoDice
+    +bool HasCurrentPlayerThrewDice
+    +bool IsGameOver
+    +GameMap GameMap
+    +GameMovesSystem GameMovesSystem
+    +EventHandler EventHandler
+    -PlayersCreator _playersCreator
+    +void Construct(EventHandler)
+    +Action SetGameMovesSystem(GameMovesSystem)
+    +void SetPlayersCreator(PlayersCreator)
+    -void InitGame()
+}
+
+class CardUI {
+    -RectTransform cardTransform
+    -GameObject cardFrontSide
+    -GameObject cardBackSide
+    -CardInfoUI cardInfoUI
+    -RectTransform _cardHolderTransform
+    -Sequence _currentSequence
+    -float _cardDefaultPositionX
+    -EventHandler _eventHandler
+    -PlayerHandVisuals _playerHandVisuals
+    +void Construct(EventHandler, PlayerHandVisuals)
+    +void OnPointerEnter(PointerEventData)
+    +void OnPointerExit(PointerEventData)
+    +void OnPointerClick(PointerEventData)
+    -void MoveCardUp()
+}
+
+' AI
+class OptimalMoveProcessor {
+    -DumbAIControlledPlayer _player
+    +OptimalMoveProcessor(DumbAIControlledPlayer)
+}
+
+class AIMovesSystem {
+    -DumbAIControlledPlayer _player
+    -EventHandler _eventHandler
+    +AIMovesSystem(DumbAIControlledPlayer, EventHandler, ...)
+    +void ThrowDices()
+    +void SellCard(int cardId)
+}
+
+' Классы для работы с тайлами и зданиями
+class TilesClickManager {
+    +void OnTileClick(Tile tile)
+    +void HighlightTile(Tile tile)
+    +void ResetHighlights()
+}
+
+class TilePurchaseSystem {
+    +void PurchaseTile(Player player, Tile tile)
+    +bool CanPurchase(Player player, Tile tile)
+}
+
+abstract class Building {
+    +int ID
+    +string BuildingNameTag
+    +string BuildingDescriptionTag
+    +BuildingType Type
+    +int MinDiceValue
+    +int MaxDiceValue
+    +SurfaceType RequirementTileSurface
+    +BuildingEmblem Emblem
+    +int Price
+    +Player Owner
+    +Tile Tile  
+
+    +void SetOwner(Player player)
+    +void SetTile(Tile tile)
+    +int GetIncomeInCaseOfInvoke(Game game)
+    +void Effect(Game game)
+    +BuildingEffectPopup GetPopup(Game game)
+}
+
+class BuilderOnTile {
+    +Tile CurrentTile
+    +void PlaceBuilding(Building building)
+    +void RemoveBuilding()
+}
+
+' Связи и подписки
+HumanControlledPlayer --|> IPlayer : реализация интерфейса
+DumbAIControlledPlayer --|> IPlayer : реализация интерфейса
+DumbAIControlledPlayer --|> IBot : реализация интерфейса
+
+Eaters --|> IFraction : реализация интерфейса
+Proletariats --|> IFraction : реализация интерфейса
+Marauders --|> IFraction : реализация интерфейса
+Goldkeepers --|> IFraction : реализация интерфейса
+
+PlayerHand --|> IHand : реализация интерфейса
+
+GameMovesSystem --> Game : зависимость (использует)
+Game --> GameMovesSystem : композиция (содержит)
+Game --> PlayersCreator : композиция (содержит)
+PlayersCreator --> HumanControlledPlayer : фабрика
+PlayersCreator --> DumbAIControlledPlayer : фабрика
+PlayersCreator --> PlayerHand : фабрика
+
+CardUI --> PlayerHandVisuals : зависимость (использует)
+
+DumbAIControlledPlayer o-- OptimalMoveProcessor : композиция (OMP)
+DumbAIControlledPlayer o-- AIMovesSystem : композиция (MovesSystem)
+OptimalMoveProcessor --> DumbAIControlledPlayer : зависимость (использует)
+AIMovesSystem --> DumbAIControlledPlayer : зависимость (использует)
+
+GameMovesSystem --> TilesClickManager : зависимость (использует)
+GameMovesSystem --> PlayerHandVisuals : зависимость (использует)
+PlayerHand --> BuilderOnTile : зависимость (использует)
+PlayerHand --> PlayerHandVisuals : зависимость (использует)
+PlayerHand --> BuildingsObjectStorage : зависимость (использует)
+BuilderOnTile --> TilePurchaseSystem : зависимость (использует)
+BuilderOnTile --> Building : зависимость (использует)
+
+' Связи перечислений с Building
+BuildingType <|-- Building : тип здания
+SurfaceType <|-- Building : тип поверхности
+BuildingEmblem <|-- Building : эмблема
+
+@enduml
