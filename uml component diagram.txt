@@ -1,0 +1,65 @@
+@startuml
+' Диаграмма компонентов
+
+' Игроки
+component "Player Management" {
+    [HumanControlledPlayer]
+    [DumbAIControlledPlayer]
+    [PlayersCreator]
+    interface IPlayer
+    interface IBot
+    IPlayer <.. [HumanControlledPlayer]
+    IPlayer <.. [DumbAIControlledPlayer]
+    IBot <.. [DumbAIControlledPlayer]
+}
+
+
+' Рука игрока
+component "Player Hand System" {
+    [PlayerHand]
+    [PlayerHandVisuals]
+    [CardUI]
+    interface IHand
+    IHand <.. [PlayerHand]
+    [CardUI] --> [PlayerHandVisuals]
+}
+
+' Система ходов
+component "Game Core" {
+    [Game]
+    [GameMovesSystem]
+    [TilesClickManager]
+    [TilePurchaseSystem]
+    [BuilderOnTile]
+}
+
+' AI
+component "AI System" {
+    [OptimalMoveProcessor]
+    [AIMovesSystem]
+}
+
+' Здания и тайлы
+component "Buildings & Tiles" {
+    [Building]
+}
+
+' Связи между компонентами
+[PlayersCreator] --> [HumanControlledPlayer]
+[PlayersCreator] --> [DumbAIControlledPlayer]
+[PlayersCreator] --> [PlayerHand]
+
+[Game] --> [GameMovesSystem]
+[Game] --> [PlayersCreator]
+
+[DumbAIControlledPlayer] --> [OptimalMoveProcessor]
+[DumbAIControlledPlayer] --> [AIMovesSystem]
+
+[GameMovesSystem] --> [TilesClickManager]
+[GameMovesSystem] --> [PlayerHandVisuals]
+
+[PlayerHand] --> [BuilderOnTile]
+[BuilderOnTile] --> [TilePurchaseSystem]
+[BuilderOnTile] --> [Building]
+
+@enduml
