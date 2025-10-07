@@ -8,8 +8,6 @@ entity "game" {
   sum_of_thrown_dice : integer
   is_thrown_two_dice : boolean
   has_current_player_threw_dice : boolean
-  current_turn_player_id : integer <<FK>>
-  created_at : timestamp
 }
 
 entity "player" {
@@ -36,8 +34,16 @@ entity "building_type" {
 }
 
 entity "building_catalog" {
+  *building_catalog_id : integer
+  --
+  building_sprite : varchar
+  fraction_color : varchar
+}
+
+entity "building" {
   *building_id : integer
   --
+  building_catalog_id : integer <<FK>>
   name_tag : varchar
   description_tag : varchar
   type_id : integer <<FK>>
@@ -49,14 +55,10 @@ entity "building_catalog" {
 }
 
 entity "player_building" {
-  *player_building_id : integer
+  *player_id : integer <<FK>>
   --
   game_id : integer <<FK>>
-  player_id : integer <<FK>>
   building_id : integer <<FK>>
-  tile_id : integer <<FK>>
-  is_grey : boolean
-  is_enabled : boolean
 }
 
 entity "player_hand" {
@@ -68,13 +70,12 @@ entity "player_hand" {
   ability_to_sell : boolean
 }
 
-entity "hand_card" {
+entity "card" {
   *card_id : integer
   --
   hand_id : integer <<FK>>
   building_id : integer <<FK>>
   slot_index : integer
-  is_used : boolean
 }
 
 entity "tile" {
@@ -87,45 +88,54 @@ entity "tile" {
   is_available_for_build : boolean
 }
 
-entity "game_move" {
-  *move_id : integer
+entity "game_move_system" {
+  game_id : integer <<FK>>
+  move_type : varchar
+  step_count : integer
+  current_turn_player_id : integer <<FK>>
+}
+
+entity "main_base" {
+  *base_id : integer
   --
   game_id : integer <<FK>>
   player_id : integer <<FK>>
-  move_type : varchar
-  step_count : integer
-  created_at : timestamp
+  active_floors_count : integer
+  floors_data : text
 }
 
 entity "main_base_floor" {
   *floor_id : integer
   --
-  building_id : integer <<FK>>
+  base_id : integer <<FK>>
   floor_type : varchar
   is_active : boolean
-  level : integer
 }
 
 ' Связи
-game ||--o{ player : "contains"
-player }o--|| fraction : "belongs to"
-building_catalog }o--|| building_type : "has type"
+game ||--o{ player
+player ||--|| fraction
+building_catalog ||--o{ building
+building }o--|| building_type
 
-player_building }o--|| game : "belongs to"
-player_building }o--|| player : "owned by"
-player_building }o--|| building_catalog : "instance of"
-player_building }o--|| tile : "placed on"
+player_building }o--|| game
+player_building }o--|| player
+building }o--|| player_building
+player_building }o--|| tile
 
-player_hand }o--|| game : "belongs to"
-player_hand }o--|| player : "owned by"
-hand_card }o--|| player_hand : "part of"
-hand_card }o--|| building_catalog : "references"
+player_hand }o--|| game
+player_hand ||--|| player
+card }o--|| player_hand
+card }o--|| building
 
-tile }o--|| player : "owned by"
+tile }o--|| player
 
-game_move }o--|| game : "part of"
-game_move }o--|| player : "made by"
+game_move_system ||--|| game
+game_move_system ||--|| player
 
-main_base_floor }o--|| building_catalog : "extends"
+main_base }o--|| game
+main_base }o--|| player
+main_base }o--|| building_catalog
+main_base_floor }o--|| main_base
 
 @enduml
