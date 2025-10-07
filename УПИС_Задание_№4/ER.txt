@@ -1,0 +1,131 @@
+@startuml
+hide circle
+
+entity "game" {
+  *game_id : integer
+  --
+  is_game_over : boolean
+  sum_of_thrown_dice : integer
+  is_thrown_two_dice : boolean
+  has_current_player_threw_dice : boolean
+  current_turn_player_id : integer <<FK>>
+  created_at : timestamp
+}
+
+entity "player" {
+  *player_id : integer
+  --
+  player_type : varchar
+  fraction_id : integer <<FK>>
+  money : integer
+  is_active : boolean
+}
+
+entity "fraction" {
+  *fraction_id : integer
+  --
+  name_tag : varchar
+  description_tag : varchar
+  color_hex : varchar
+}
+
+entity "building_type" {
+  *type_id : integer
+  --
+  name : varchar
+}
+
+entity "building_catalog" {
+  *building_id : integer
+  --
+  name_tag : varchar
+  description_tag : varchar
+  type_id : integer <<FK>>
+  min_dice_value : integer
+  max_dice_value : integer
+  requirement_surface_type : varchar
+  emblem_type : varchar
+  price : integer
+}
+
+entity "player_building" {
+  *player_building_id : integer
+  --
+  game_id : integer <<FK>>
+  player_id : integer <<FK>>
+  building_id : integer <<FK>>
+  tile_id : integer <<FK>>
+  is_grey : boolean
+  is_enabled : boolean
+}
+
+entity "player_hand" {
+  *hand_id : integer
+  --
+  game_id : integer <<FK>>
+  player_id : integer <<FK>>
+  ability_to_replace_count : integer
+  ability_to_sell : boolean
+}
+
+entity "hand_card" {
+  *card_id : integer
+  --
+  hand_id : integer <<FK>>
+  building_id : integer <<FK>>
+  slot_index : integer
+  is_used : boolean
+}
+
+entity "tile" {
+  *tile_id : integer
+  --
+  pos_x : integer
+  pos_y : integer
+  surface_type : varchar
+  owner_player_id : integer <<FK>>
+  is_available_for_build : boolean
+}
+
+entity "game_move" {
+  *move_id : integer
+  --
+  game_id : integer <<FK>>
+  player_id : integer <<FK>>
+  move_type : varchar
+  step_count : integer
+  created_at : timestamp
+}
+
+entity "main_base_floor" {
+  *floor_id : integer
+  --
+  building_id : integer <<FK>>
+  floor_type : varchar
+  is_active : boolean
+  level : integer
+}
+
+' Связи
+game ||--o{ player : "contains"
+player }o--|| fraction : "belongs to"
+building_catalog }o--|| building_type : "has type"
+
+player_building }o--|| game : "belongs to"
+player_building }o--|| player : "owned by"
+player_building }o--|| building_catalog : "instance of"
+player_building }o--|| tile : "placed on"
+
+player_hand }o--|| game : "belongs to"
+player_hand }o--|| player : "owned by"
+hand_card }o--|| player_hand : "part of"
+hand_card }o--|| building_catalog : "references"
+
+tile }o--|| player : "owned by"
+
+game_move }o--|| game : "part of"
+game_move }o--|| player : "made by"
+
+main_base_floor }o--|| building_catalog : "extends"
+
+@enduml
