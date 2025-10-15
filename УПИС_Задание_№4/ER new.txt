@@ -1,0 +1,99 @@
+Table game {
+  game_id integer [pk]
+  is_game_over boolean
+  sum_of_thrown_dice integer
+  is_thrown_two_dice boolean
+  has_current_player_threw_dice boolean
+}
+
+Table player {
+  player_id integer [pk]
+  player_type varchar
+  fraction_id integer [ref: > fraction.fraction_id]
+  money integer
+  is_active boolean
+}
+
+Table fraction {
+  fraction_id integer [pk]
+  name_tag varchar
+  description_tag varchar
+  color_hex varchar
+}
+
+Table building_type {
+  type_id integer [pk]
+  name varchar
+  color varchar
+}
+
+Table building_catalog {
+  building_catalog_id integer [pk]
+  building_sprite varchar
+  fraction_color varchar
+}
+
+Table building {
+  building_id integer [pk]
+  building_catalog_id integer [ref: > building_catalog.building_catalog_id]
+  name_tag varchar
+  description_tag varchar
+  type_id integer [ref: > building_type.type_id]
+  min_dice_value integer
+  max_dice_value integer
+  requirement_surface_type varchar
+  emblem_type varchar
+  price integer
+}
+
+Table player_building {
+  player_id integer [ref: > player.player_id]
+  game_id integer [ref: > game.game_id]
+  building_id integer [ref: > building.building_id]
+}
+
+Table player_hand {
+  hand_id integer [pk]
+  game_id integer [ref: > game.game_id]
+  player_id integer [ref: > player.player_id]
+  ability_to_replace_count integer
+  ability_to_sell boolean
+}
+
+Table card {
+  card_id integer [pk]
+  hand_id integer [ref: > player_hand.hand_id]
+  building_id integer [ref: > building.building_id]
+  slot_index integer
+}
+
+Table tile {
+  tile_id integer [pk]
+  pos_x integer
+  pos_y integer
+  surface_type varchar
+  owner_player_id integer [ref: > player.player_id]
+  is_available_for_build boolean
+}
+
+Table game_move_system {
+  game_id integer [ref: > game.game_id]
+  move_type varchar
+  step_count integer
+  current_turn_player_id integer [ref: > player.player_id]
+}
+
+Table main_base {
+  base_id integer [pk]
+  game_id integer [ref: > game.game_id]
+  player_id integer [ref: > player.player_id]
+  active_floors_count integer
+  floors_data text
+}
+
+Table main_base_floor {
+  floor_id integer [pk]
+  base_id integer [ref: > main_base.base_id]
+  floor_type varchar
+  is_active boolean
+}
