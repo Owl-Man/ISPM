@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+actor "Игрок" as Player
+actor "Разработчик" as Dev
+
+rectangle "Пользовательские роли и их задачи" {
+  usecase "UC-001: Запуск новой игровой партии" as UC1
+  usecase "UC-002: Совершение игрового хода (в общем ключе)" as UC2
+  usecase "UC-003: Управление этажами базы (в рамках игровой партии)" as UC3
+  usecase "UC-004: Использование карты (в рамках игровой партии)" as UC4
+  usecase "UC-005: Покупка тайлов местности (в рамках игровой партии)" as UC5
+
+  usecase "UC-101: Добавление новой карты и прочих игровых механик" as UC101
+  usecase "UC-102: Изменение игрового баланса и поведение ИИ" as UC102
+  usecase "UC-103: Отладка и исправление ошибок" as UC103
+  usecase "UC-104: Подготовка билда для публикации" as UC104
+}
+
+Player --> UC1
+Player --> UC2
+Player --> UC3
+Player --> UC4
+Player --> UC5
+
+Dev --> UC101
+Dev --> UC102
+Dev --> UC103
+Dev --> UC104
+@enduml
